@@ -7,9 +7,14 @@ public class Node {
 	private Node left;
 	
 	private Node right;
+	
+	private Node parent;
 
 	public Node() {
 		
+	}
+	public Node(int value) {
+		this.value = value;
 	}
 	public Node(int value, Node left, Node right) {
 		super();
@@ -34,6 +39,12 @@ public class Node {
 	}
 	public void setRight(Node right) {
 		this.right = right;
+	}
+	public Node getParent() {
+		return parent;
+	}
+	public void setParent(Node parent) {
+		this.parent = parent;
 	}
 	
 	
