@@ -1,7 +1,9 @@
 package niube.danceLink;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
 
 
 
@@ -21,21 +23,87 @@ public class DanceLinkTest {
 	private int[] excute() {
 		
 		init();
+		result = new LinkedList<DecisionStack>();
+		ArrayList<Integer> choice = new ArrayList<Integer>();
+		DecisionStack backDecision = null;
 		while(header.getRight() != header) {
 			LinkNode right = header.getRight();
 			LinkNode down = right.getDown();
-			//result.addFirst();
 			
+			while (backDecision != null && down != right && down.getRow() <= backDecision.getChoosedRow()) {
+				down = down.getDown();
+			}
+			
+			if (down == right) {
+				if (!result.isEmpty()) {
+					backDecision = result.removeFirst();
+					addCols(backDecision.getRemovedCols());
+					continue;
+				} else
+					break;
+			}
+			backDecision = null;
+			choice.add(down.getRow());
+			ArrayList<Integer> removedCols = new ArrayList<Integer>();
+			removedCols.add(down.getCol());
+			LinkNode curNode = down.getRight();
+			while(curNode != down) {
+				removedCols.add(curNode.getCol());
+				curNode = curNode.getRight();
+			}
+			DecisionStack decisionStack = new DecisionStack();
+			decisionStack.setChoosedRow(down.getRow());
+			decisionStack.setRemovedCols(removedCols);
+			removeCols(removedCols);
+			result.addFirst(decisionStack);
 		}
-		return null;
+		return result.stream().mapToInt(t -> t.getChoosedRow()).toArray();
 	}
 	
-	private void removeRow(int row) {
-		
+	private void removeCols(List<Integer> cols) {
+		ArrayList<Integer> removedRows = new ArrayList<Integer>();
+		for (Integer col : cols) {
+			colNodes[col].getLeft().setRight(colNodes[col].getRight());
+			colNodes[col].getRight().setLeft(colNodes[col].getLeft());
+			LinkNode curNode = colNodes[col].getDown();
+			while (curNode != colNodes[col]) {
+				if (!removedRows.contains(curNode.getRow())) {
+					LinkNode innerCurNode = curNode.getRight();
+					while(innerCurNode != curNode) {
+						if (!cols.contains(innerCurNode.getCol())) {
+							innerCurNode.getUp().setDown(innerCurNode.getDown());
+							innerCurNode.getDown().setUp(innerCurNode.getUp());
+						}
+						innerCurNode = innerCurNode.getRight();
+					}
+					removedRows.add(curNode.getRow());
+				}
+				curNode = curNode.getDown();
+			}
+		}
 	}
 	
-	private void addRow(int row) {
-		
+	private void addCols(List<Integer> cols) {
+		ArrayList<Integer> addRows = new ArrayList<Integer>();
+		for (Integer col : cols) {
+			colNodes[col].getLeft().setRight(colNodes[col]);
+			colNodes[col].getRight().setLeft(colNodes[col]);
+			LinkNode curNode = colNodes[col].getDown();
+			while (curNode != colNodes[col]) {
+				if (!addRows.contains(curNode.getRow())) {
+					LinkNode innerCurNode = curNode.getRight();
+					while(innerCurNode != curNode) {
+						if (!cols.contains(innerCurNode.getCol())) {
+							innerCurNode.getUp().setDown(innerCurNode);
+							innerCurNode.getDown().setUp(innerCurNode);
+						}
+						innerCurNode = innerCurNode.getRight();
+					}
+					addRows.add(curNode.getRow());
+				}
+				curNode = curNode.getDown();
+			}
+		}
 	}
 	private void init() {
 		header = new LinkNode();
@@ -52,13 +120,13 @@ public class DanceLinkTest {
 		}
 		curNode.setRight(header);
 		header.setLeft(curNode);
-		LinkNode[][] nodeMap = new LinkNode[colsize][rowsize];
+		LinkNode[][] nodeMap = new LinkNode[rowsize][colsize];
 		for (int m = 0;m<rowsize;m++) {
 			curNode = null;
 			LinkNode firstNode = null;
 			for (int n = 0;n<colsize;n++) {
-				if (src[n][m] != 0) {
-					LinkNode linkNode = new LinkNode(src[n][m], n, m);
+				if (src[m][n] != 0) {
+					LinkNode linkNode = new LinkNode(src[m][n], n, m);
 					if (curNode != null) {
 						curNode.setRight(linkNode);
 						linkNode.setLeft(curNode);
@@ -66,7 +134,7 @@ public class DanceLinkTest {
 						firstNode = linkNode;
 						curNode = linkNode;
 					}
-					nodeMap[n][m] = linkNode;
+					nodeMap[m][n] = linkNode;
 					curNode = linkNode;
 				}
 			}
@@ -79,7 +147,7 @@ public class DanceLinkTest {
 		for (int p = 0;p<colsize;p++) {
 			curNode = colNodes[p];
 			for (int q = 0;q<rowsize;q++) {
-				LinkNode linkNode = nodeMap[p][q];
+				LinkNode linkNode = nodeMap[q][p];
 				if (linkNode != null) {
 					linkNode.setUp(curNode);
 					curNode.setDown(linkNode);
@@ -175,27 +243,13 @@ public class DanceLinkTest {
 		public void setRow(int row) {
 			this.row = row;
 		}
-		
-//		public void remove() {
-//			left.setRight(right);
-//			right.setLeft(left);
-//			up.setDown(down);
-//			down.setUp(up);
-//		}
-//		
-//		public void add() {
-//			left.setRight(this);
-//			right.setLeft(this);
-//			up.setDown(this);
-//			down.setUp(this);
-//		}
 	}
 	
 	private class DecisionStack {
 		
 		private int choosedRow;
 		
-		private List<Integer> removedRow;
+		private List<Integer> removedCols;
 
 		public int getChoosedRow() {
 			return choosedRow;
@@ -205,12 +259,29 @@ public class DanceLinkTest {
 			this.choosedRow = choosedRow;
 		}
 
-		public List<Integer> getRemovedRow() {
-			return removedRow;
+		public List<Integer> getRemovedCols() {
+			return removedCols;
 		}
 
-		public void setRemovedRow(List<Integer> removedRow) {
-			this.removedRow = removedRow;
+		public void setRemovedCols(List<Integer> removedCols) {
+			this.removedCols = removedCols;
+		}
+
+		
+	}
+	
+	public static void main(String[] args) {
+		int[] arr1 = new int[]{0,0,1,0,1,1,0};
+		int[] arr2 = new int[]{1,0,0,1,0,0,1};
+		int[] arr3 = new int[]{0,1,1,0,0,1,0};
+		int[] arr4 = new int[]{1,0,0,1,0,0,0};
+		int[] arr5 = new int[]{0,1,0,0,0,0,1};
+		int[] arr6 = new int[]{0,0,0,1,1,0,1};
+		int[][] src = new int[][] {arr1, arr2, arr3, arr4, arr5, arr6};
+		//System.out.println(src[1][6]);
+		int[] excute = new DanceLinkTest(src).excute();
+		for (int value : excute) {
+			System.out.print(value + "\t");
 		}
 	}
 }
