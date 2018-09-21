@@ -5,11 +5,9 @@ import sun.nio.ch.Interruptible;
 public class InterruptDemo {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		MyThread myThread = new MyThread();
 		sun.misc.SharedSecrets.getJavaLangAccess().blockedOn(myThread, new MyInterruptHandler());
 		myThread.start();
-		
 		myThread.interrupt();
 	}
 
@@ -25,8 +23,10 @@ public class InterruptDemo {
 
 		@Override
 		public void interrupt(Thread thread) {
-			if (thread instanceof MyThread)
+			if (thread instanceof MyThread) {
 				((MyThread) thread).flag = false;
+				System.out.println("thread is interrupted");
+			}
 		}
 		
 	}

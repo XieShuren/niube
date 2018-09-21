@@ -8,7 +8,7 @@ public class HeapView {
 		ArrayList<OOMObject> list = new ArrayList<OOMObject>();
 		for (int i = 0;i<1000;i++) {
 			list.add(new OOMObject());
-			Thread.sleep(100);
+			Thread.sleep(500);
 		}
 		System.gc();
 	}
