@@ -9,11 +9,11 @@ public class TryCloseSource {
 
 	public static void main(String[] args) throws IOException, Exception {
 		// TODO Auto-generated method stub
-		try (
+		/*try (
 				ObjectInputStream in = new ObjectInputStream(new FileInputStream("abc.txt"));
 				){
 			int read = in.read();
-		}
+		}*/
 	}
 
 }

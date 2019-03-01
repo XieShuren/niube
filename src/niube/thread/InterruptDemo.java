@@ -8,7 +8,7 @@ public class InterruptDemo {
 		MyThread myThread = new MyThread();
 		sun.misc.SharedSecrets.getJavaLangAccess().blockedOn(myThread, new MyInterruptHandler());
 		myThread.start();
-		myThread.interrupt();
+//		myThread.interrupt();
 	}
 
 	static class MyThread extends Thread {

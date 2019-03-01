@@ -57,7 +57,8 @@ public class DanceLinkTest {
 			removeCols(removedCols);
 			result.addFirst(decisionStack);
 		}
-		return result.stream().mapToInt(t -> t.getChoosedRow()).toArray();
+//		return result.stream().mapToInt(t -> t.getChoosedRow()).toArray();
+		return null;
 	}
 	
 	private void removeCols(List<Integer> cols) {
